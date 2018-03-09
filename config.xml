@@ -89,4 +89,5 @@
         <variable name="XWALK_MULTIPLEAPK" value="true" />
     </plugin>
     <engine name="android" spec="6.2.3" />
+    <plugin name="cordova-plugin-audioinput" spec="^0.3.0" />
 </widget>
