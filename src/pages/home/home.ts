@@ -22,15 +22,35 @@ export class HomePage {
     this.oscillatorNode = this.audioCtx.createOscillator();
     this.gainNode = this.audioCtx.createGain();
 
-    this.oscillatorNode.frequency.value = Number(this.toneFreq);
-    this.gainNode.gain.value = 0;
+    this.oscillatorNode.frequency.setValueAtTime(Number(this.toneFreq), 
+      this.audioCtx.currentTime + 1);
+    this.gainNode.gain.setValueAtTime(0, this.audioCtx.currentTime);
 
     this.oscillatorNode.connect(this.gainNode);
     this.gainNode.connect(this.audioCtx.destination);
+
+    this.oscillatorNode.start();
   }
 
   onPlayClick() {
-    this.gainNode.gain.value = this.gainNode.gain.value == 0 ? 0.1 : 0;
+    if(this.gainNode.gain.value == 0) {
+      this.gainNode.gain.setValueAtTime(0.5, this.audioCtx.currentTime)
+    } else {
+      this.gainNode.gain.setValueAtTime(0, this.audioCtx.currentTime)
+    }
+  }
+
+  onToneFreqChange(newTone: string) {
+    let tone = Math.round(Number(newTone));
+    if(tone < 10) {
+      tone = 10;
+    } else if(tone > 20000) {
+      tone = 20000;
+    }
+
+    this.freqTone = String(tone);
+
+    this.oscillatorNode.frequency.setValueAtTime(tone, this.audioCtx.currentTime);
   }
 
 }
