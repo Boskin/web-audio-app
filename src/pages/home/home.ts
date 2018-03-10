@@ -13,4 +13,8 @@ export class HomePage {
   constructor(public navCtrl: NavController) {
     this.nav = navCtrl;
   }
+
+  onButtonClick() {
+    this.nav.push(VoiceDetectionPage);
+  }
 }
