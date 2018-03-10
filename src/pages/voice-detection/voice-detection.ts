@@ -8,6 +8,9 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
  * Ionic pages and navigation.
  */
 
+declare var audioinput;
+declare var window;
+
 @IonicPage()
 @Component({
   selector: 'page-voice-detection',
