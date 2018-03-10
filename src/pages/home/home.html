@@ -7,10 +7,5 @@
 </ion-header>
 
 <ion-content padding>
-  <ion-item>
-    <ion-label>Tone frequency:</ion-label>
-    <ion-input [(ngModel)]="toneFreq" (ngModelChange)="onToneFreqChange($event)"></ion-input>
-  </ion-item>
-
-  <button ion-button color="danger" (click)="onPlayClick();">Play</button>
+  <button ion-button color="danger" (click)="this.nav.push(VoiceDetectionPage);">Voice Detection</button>
 </ion-content>
