@@ -97,8 +97,8 @@ export class VoiceDetectionPage {
 
     this.filterNode = this.audioCtx.createBiquadFilter();
     this.filterNode.type = 'bandpass';
-    this.filterNode.frequency.setValueAtTime(this.centerFreq, this.audioCtx.currentTime);
-    this.filterNode.Q.setValueAtTime(this.centerFreq / this.bandwidth, this.audioCtx.currentTime);
+    this.filterNode.frequency.setValueAtTime(1750.0, this.audioCtx.currentTime);
+    this.filterNode.Q.setValueAtTime(1750.0 / 3100.0, this.audioCtx.currentTime);
 
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.setValueAtTime(0.5, this.audioCtx.currentTime);
