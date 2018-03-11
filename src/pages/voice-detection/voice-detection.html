@@ -15,17 +15,46 @@
 
 <ion-content padding>
   <button ion-button (click)="onToggleListening()">Start Listening</button>
-  <ion-item>
-    <ion-label>Gain</ion-label>
-    <ion-input type="number" [ngModel]="volume" (ngModelChange)="onVolumeChanged($event);" value="0.5"></ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-label>Frequency</ion-label>
-    <ion-input type="number" value="1850" [ngModel]="centerFreq" (ngModelChange)="onFreqChanged($event);"></ion-input>
+  <ion-list radio-group [ngModel]="audioSource" (ngModelChange)="audioSourceChanged($event);">
+    <ion-list-header>Audio Source</ion-list-header>
+    
+    <ion-item>
+      <ion-label>None</ion-label>
+      <ion-radio value="none"></ion-radio>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Microphone</ion-label>
+      <ion-radio value="microphone"></ion-radio>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Oscillator</ion-label>
+      <ion-radio value="oscillator"></ion-radio>
+    </ion-item>
+  </ion-list>
+
+  <ion-item *ngIf="audioSource == 'oscillator'">
+    <ion-label>Oscillator Frequency</ion-label>
+    <ion-input type="number" [ngModel]="oscFreq" (ngModelChange)="onOscFreqChanged($event);" ></ion-input>
   </ion-item>
 
-  <ion-item>
-    <ion-label>Bandwidth</ion-label>
-    <ion-input type="number" value="3100" [ngModel]="bandwidth"  (ngModelChange)="onBandChanged($event);"></ion-input>
-  </ion-item>
+  <ion-list>
+    <ion-list-header>System Parameters</ion-list-header>
+
+    <ion-item>
+      <ion-label>Gain</ion-label>
+      <ion-input type="number" [ngModel]="volume" (ngModelChange)="onVolumeChanged($event);" value="0.5"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Frequency</ion-label>
+      <ion-input type="number" value="1850" [ngModel]="centerFreq" (ngModelChange)="onFreqChanged($event);"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Bandwidth</ion-label>
+      <ion-input type="number" value="3100" [ngModel]="bandwidth"  (ngModelChange)="onBandChanged($event);"></ion-input>
+    </ion-item>
+  </ion-list>
 </ion-content>

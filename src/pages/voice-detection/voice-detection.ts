@@ -20,6 +20,9 @@ export class VoiceDetectionPage {
   micListening: boolean = false;
 
   micSource: any = undefined;
+  oscillatorNode: any = undefined;
+  // Holds references to all audio source nodes for easy disconnect
+  audioSourceNodes: any[] = undefined;
 
   audioCtx: any = undefined;
   gainNode: any = undefined;
@@ -27,9 +30,11 @@ export class VoiceDetectionPage {
   analyserNode: any = undefined;
 
   // Bound inputs
+  audioSource: string = 'none';
   volume: string = '0.5';
   centerFreq: string = '1750';
   bandwidth: string = '3100';
+  oscFreq: string = '1750';
 
   _energyUpdateInterval = 0;
 
@@ -44,7 +49,43 @@ export class VoiceDetectionPage {
     } else {
       this.micSource.disconnect();
     }
-  } 
+  }
+
+  audioSourceChanged(source) {
+    this.audioSource = source;
+
+    // Disconnect all audio source nodes
+    for(let i of this.audioSourceNodes) {
+      i.disconnect();
+    }
+
+    switch(source) {
+      case 'microphone':
+        if(this.micSource != undefined) {
+          this.micSource.connect(this.filterNode);
+        }
+        break;
+
+      case 'oscillator':
+        this.oscillatorNode.connect(this.filterNode);
+        break;
+
+      default:
+        console.log('Input off');
+    }
+  }
+
+  onOscFreqChanged(freq) {
+    let f = Number(freq);
+    if(f < 10) {
+      f = 10;
+    } else if(f > 20000) {
+      f = 20000;
+    }
+
+    this.oscFreq = String(freq);
+    this.oscillatorNode.frequency.setValueAtTime(f, this.audioCtx.currentTime);
+  }
 
   // Update filter center frequency
   onFreqChanged(freq) {
@@ -67,7 +108,7 @@ export class VoiceDetectionPage {
     } else if(b < 10) {
       b = 10;
     }
-    this.bandwidth = Number(b);
+    this.bandwidth = String(b);
     this.updateFilter();
   }
 
@@ -120,6 +161,13 @@ export class VoiceDetectionPage {
     this.analyserNode.fftSize = 512;
     this.analyserNode.smoothingTimeConstant = 0;
 
+    this.oscillatorNode = this.audioCtx.createOscillator();
+    this.oscillatorNode.frequency.setValueAtTime(1750.0, this.audioCtx.currentTime);
+    this.oscillatorNode.start();
+
+    this.audioSourceNodes = [];
+    this.audioSourceNodes.push(this.oscillatorNode);
+
     // Compute energy every second and print to the console
     this.energyUpdateInterval = setInterval(() => {
       let energy = 0;
@@ -140,17 +188,19 @@ export class VoiceDetectionPage {
 
     // Microphone input, use audioinput on mobile devices
     try {
-      declare var audioinput;
+      declare let audioinput;
       audioinput.start({
         streamToWebAudio: true,
         audioContext: this.audioCtx
       });
       this.micSource = audioinput;
+      this.audioSourceNodes.push(audioinput);
     } catch(e) {
       // If not a mobile device, use navigator web API
       let promise = navigator.mediaDevices.getUserMedia({audio: true, video: false});
       promise.then((stream) => {
         this.micSource = this.audioCtx.createMediaStreamSource(stream);
+        this.audioSourceNodes.push(this.micSource);
       }).catch((err) => {
         console.log(err);
       });
