@@ -8,7 +8,6 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
  * Ionic pages and navigation.
  */
 
-declare var audioinput;
 declare var window;
 
 @IonicPage()
@@ -20,8 +19,15 @@ export class VoiceDetectionPage {
 
   micListening: boolean = false;
 
+  micSource: any = undefined;
+
   audioCtx: any = undefined;
   gainNode: any = undefined;
+  filterNode: any = undefined;
+
+  volume: string = '0.5';
+  centerFreq: string = '1750';
+  bandwidth: string = '3100';
 
   constructor(public navCtrl: NavController, public navParams: NavParams) {
   }
@@ -29,21 +35,58 @@ export class VoiceDetectionPage {
   onToggleListening() {
     this.micListening = !this.micListening;
     if(this.micListening) {
-      audioinput.connect(this.gainNode);
+      this.micSource.connect(this.filterNode);
     } else {
-      audioinput.disconnect();
+      this.micSource.disconnect();
     }
+  } 
+
+  onFreqChanged(freq) {
+    let f = Number(freq);
+    if(f < 10) {
+      f = 10;
+    } else if(f > 20000) {
+      f = 20000;
+    }
+
+    this.centerFreq = String(f);
+    this.updateFilter();
   }
 
-  onGainChanged(newVolume) {
+  onBandChanged(band) {
+    let b = Number(band);
+    if(b > 20000) {
+      b = 20000;
+    } else if(b < 10) {
+      b = 10;
+    }
+    this.bandwidth = Number(b);
+    this.updateFilter();
+  }
+
+  onVolumeChanged(newVolume) {
     let volume = Number(newVolume);
     if(volume > 1.0) {
       volume = 1.0;
     } else if(volume < 0.0) {
       volume = 0.0;
     }
+    this.volume = String(volume);
 
-    this.gainNode.gain.setValueAtTime(volume, this.audioCtx.currentTime);
+    if(this.gainNode != undefined) {
+      this.gainNode.gain.setValueAtTime(volume, this.audioCtx.currentTime);
+    }
+  }
+
+  updateFilter() {
+    let f = Number(this.centerFreq);
+    let b = Number(this.bandwidth);
+    let q = f / b;
+
+    if(this.filterNode != undefined) {
+      this.filterNode.frequency.setValueAtTime(f, this.audioCtx.currentTime);
+      this.filterNode.Q.setValueAtTime(q, this.audioCtx.currentTime);
+    }
   }
 
   ionViewDidLoad() {
@@ -52,18 +95,36 @@ export class VoiceDetectionPage {
     let AudioContext = window.AudioContext || window.webkitAudioContext;
     this.audioCtx = new AudioContext();
 
+    this.filterNode = this.audioCtx.createBiquadFilter();
+    this.filterNode.type = 'bandpass';
+    this.filterNode.frequency.setValueAtTime(this.centerFreq, this.audioCtx.currentTime);
+    this.filterNode.Q.setValueAtTime(this.centerFreq / this.bandwidth, this.audioCtx.currentTime);
+
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.setValueAtTime(0.5, this.audioCtx.currentTime);
 
-    audioinput.start({
-      streamToWebAudio: true,
-      audioContext: this.audioCtx
-    });
+    this.filterNode.connect(this.gainNode);
+    this.gainNode.connect(this.audioCtx.destination);
+
+    try {
+      declare var audioinput;
+      audioinput.start({
+        streamToWebAudio: true,
+        audioContext: this.audioCtx
+      });
+      this.micSource = audioinput;
+    } catch(e) {
+      let promise = navigator.mediaDevices.getUserMedia({audio: true, video: false});
+      promise.then((stream) => {
+        this.micSource = this.audioCtx.createMediaStreamSource(stream);
+      }).catch((err) => {
+        console.log(err);
+      });
+    }
   }
 
   ionViewWillLeave() {
     this.audioCtx.close();
-    audioinput.stop();  
   }
 
 }

@@ -17,6 +17,15 @@
   <button ion-button (click)="onToggleListening()">Start Listening</button>
   <ion-item>
     <ion-label>Gain</ion-label>
-    <ion-input type="number" value="0.5" ngModelChange="onGainChanged($event);"></ion-input>
+    <ion-input type="number" [ngModel]="volume" (ngModelChange)="onVolumeChanged($event);" value="0.5"></ion-input>
+  </ion-item>
+  <ion-item>
+      <ion-label>Frequency</ion-label>
+      <ion-input type="number" value="1850" [ngModel]="centerFreq" (ngModelChange)="onFreqChanged($event);"></ion-input>
+  </ion-item>
+
+  <ion-item>
+      <ion-label>Bandwidth</ion-label>
+      <ion-input type="number" value="3100" (ngModelChange)="onBandChanged($event);"></ion-input>
   </ion-item>
 </ion-content>
