@@ -148,7 +148,7 @@ export class VoiceDetectionPage {
 
     // Create a bandpass filter
     this.filterNode = this.audioCtx.createBiquadFilter();
-    this.filterNode.type = 'bandpass';
+    this.filterNode.type = 'lowpass';
     this.filterNode.frequency.setValueAtTime(1750.0, this.audioCtx.currentTime);
     this.filterNode.Q.setValueAtTime(1750.0 / 3100.0, this.audioCtx.currentTime);
 
@@ -188,7 +188,7 @@ export class VoiceDetectionPage {
 
     // Microphone input, use audioinput on mobile devices
     try {
-      declare let audioinput;
+      declare var audioinput;
       audioinput.start({
         streamToWebAudio: true,
         audioContext: this.audioCtx
